@@ -2,7 +2,9 @@ const express = require('express');
 const { extend } = require('lodash');
 const { User } = require('../models/user.model');
 
-const getUserFromParams = async (req, res, next, userId) => {
+const getUserFromID = async (req, res, next) => {
+	const { userId } = req.user;
+
 	try {
 		const currentUser = await User.findOne({ _id: userId });
 
@@ -22,17 +24,18 @@ const getUserFromParams = async (req, res, next, userId) => {
 const getPopulatedCart = async (req, res) => {
 	let { user } = req;
 	const populatedUser = await user.populate('cart.product').execPopulate();
-	res.json({ success: true, message: 'Successfully fetched', cart: populatedUser.cart });
+	res.json({ success: true, message: 'Successfully fetched', data: populatedUser.cart });
 };
 
 const addToCart = async (req, res) => {
 	let { user } = req;
 	const { productId } = req.body;
+	console.log(productId);
 	const updatedUser = user.cart.push({ quantity: 1, product: productId });
 	user = extend(user, updatedUser);
 	try {
 		await user.save();
-		res.json({ success: true, message: 'Added to Cart', cart: user.cart });
+		res.json({ success: true, message: 'Added to Cart', data: user.cart });
 	} catch (err) {
 		console.log('Error while Adding to cart :', err);
 		res.json({ success: false, message: 'Error while Adding to Cart' });
@@ -47,7 +50,7 @@ const updateCartItemQuanity = async (req, res) => {
 	else cartItem.quantity -= 1;
 	try {
 		await user.save();
-		res.json({ success: true, message: 'Successfully Updated', cart: user.cart });
+		res.json({ success: true, data: user.cart });
 	} catch (err) {
 		console.log('Updation unsuccessful :', err);
 		res.json({ success: false, message: 'Error while Updating' });
@@ -61,7 +64,7 @@ const deleteCartItem = async (req, res) => {
 	cartItem.remove();
 	try {
 		await user.save();
-		res.json({ success: true, message: 'Successfully Deleted', cart: user.cart });
+		res.json({ success: true, message: 'Successfully Deleted', data: user.cart });
 	} catch (err) {
 		console.log('Deletion unsuccessful');
 		res.json({ success: false, message: 'Error while Deleting' });
@@ -69,7 +72,7 @@ const deleteCartItem = async (req, res) => {
 };
 
 module.exports = {
-	getUserFromParams,
+	getUserFromID,
 	getPopulatedCart,
 	addToCart,
 	updateCartItemQuanity,

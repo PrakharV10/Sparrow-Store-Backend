@@ -1,17 +1,18 @@
 const express = require('express');
 const router = express.Router();
+const { authVerify } = require('../utils/middleware');
 const {
-	getUserFromParams,
+	getUserFromID,
 	getPopulatedCart,
 	addToCart,
 	updateCartItemQuanity,
 	deleteCartItem,
 } = require('../controllers/cart.controller');
 
-router.param('userId', getUserFromParams);
+router.use(authVerify, getUserFromID);
 
 router
-	.route('/:userId')
+	.route('/')
 	.get(getPopulatedCart)
 	.post(addToCart)
 	.put(updateCartItemQuanity)
